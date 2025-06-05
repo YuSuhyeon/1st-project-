@@ -19,7 +19,7 @@ pip install -r requirements.txt
 python data_preprocessing.py
 ```
 
-### 3. 모델 학습 및 저장장
+### 3. 모델 학습 및 저장
 ```bash
 python save_models.py
 # python model_training.py는 모델 학습만 진행!! 
