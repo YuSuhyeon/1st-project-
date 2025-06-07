@@ -27,7 +27,7 @@ python save_models.py
 
 ### 4. 웹 대시보드 실행
 ```bash
-streamlit streamlit run dashboard_blue.py
+streamlit run dashboard_blue.py
 ```
 
 ## 🎯 성과 목표
@@ -37,8 +37,4 @@ streamlit streamlit run dashboard_blue.py
 - [ ] 웹 대시보드 구축
 - [ ] 성능 검증
 
-## 📈 모델 성능
-- **XGBoost**: MAPE %, R² 
-- **Random Forest**: MAPE %, R²
-- **Linear Regression**: MAPE %, R²
 
