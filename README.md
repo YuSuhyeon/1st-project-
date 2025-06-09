@@ -17,7 +17,6 @@ mkdir -p data/raw
 
 python simple_preprocessing.py  \
 python save_models.py  \
-python quick_fix_validation.py  \
 streamlit run dashboard_blue.py
 
 
@@ -62,7 +61,6 @@ python save_models.py
 
 ### ５. 웹 대시보드 실행
 ```bash
-python quick_fix_validation.py
 streamlit run dashboard_blue.py
 ```
 
