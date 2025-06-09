@@ -16,6 +16,8 @@ pip install -r requirements.txt
 
 ### 2. 데이터 전처리
 ```bash
+data_collection.ipynb 실행시켜서 raw 데이터 생성
+
 python data_preprocessing.py
 ```
 
