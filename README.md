@@ -63,29 +63,8 @@ streamlit run dashboard_blue.py
 ```
 
 ## 프로젝트 구조
-seoul-apartment-prediction/
-├── data/
-│   ├── raw/
-│   │   └── 20250604_182224_seoul_real_estate.csv
-│   └── processed/
-│       ├── X_train.csv
-│       ├── X_test.csv
-│       ├── y_train.csv
-│       └── y_test.csv
-├── models/
-│   ├── random_forest_model.pkl
-│   ├── xgboost_model.pkl
-│   ├── linear_regression_model.pkl
-│   └── scaler.pkl
-├── results/
-│   ├── prediction_comparison.csv
-│   └── accuracy_summary.json
-├── simple_preprocessing.py      # 데이터 전처리
-├── save_models.py              # 모델 학습 및 저장
-├── quick_fix_validation.py     # 결과 파일 생성
-├── dashboard_blue.py           # 웹 대시보드
-├── requirements.txt            # 패키지 의존성
-└── README.md
+![image](https://github.com/user-attachments/assets/5cea7f04-98cf-424f-9292-81dee687b0bd)
+
 
 
 ## 🎯 성과 목표
