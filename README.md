@@ -27,7 +27,7 @@ streamlit run dashboard_blue.py
 pip install -r requirements.txt
 ```
 
-### 2. 데이터 전처리
+### 2. 데이터 수집
 ```bash
 
 데이터 수집 (선택사항)
@@ -45,18 +45,22 @@ mkdir -p data/raw
 ├── simple_preprocessing.py
 ├── save_models.py
 └── 기타 파일들...
+```
+
+### ３. 데이터 전처리
+```bash
 
 python simple_preprocessing.py 실행
 
 ```
 
-### 3. 모델 학습 및 저장
+### ４. 모델 학습 및 저장
 ```bash
 python save_models.py
 # python model_training.py는 모델 학습만 진행!!
 ```
 
-### 4. 웹 대시보드 실행
+### ５. 웹 대시보드 실행
 ```bash
 python quick_fix_validation.py
 streamlit run dashboard_blue.py
