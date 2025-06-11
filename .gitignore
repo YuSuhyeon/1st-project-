@@ -1,5 +1,4 @@
 # 데이터 파일
-*.csv
 *.xlsx
 *.pkl
 *.joblib
