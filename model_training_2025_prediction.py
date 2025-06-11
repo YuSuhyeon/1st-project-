@@ -120,11 +120,11 @@ def train_2025_prediction_models():
     start_time = datetime.now()
     
     rf_model = RandomForestRegressor(
-        n_estimators=350,      # 🔧 500 → 350 (적당히 줄임)
-        max_depth=22,          # 🔧 25 → 22 (살짝 줄임)
-        min_samples_split=4,   # 🔧 3 → 4 (살짝 보수적)
-        min_samples_leaf=2,    # 🔧 1 → 2 (살짝 보수적)
-        max_features='sqrt',   # 🔧 log2 → sqrt (살짝 보수적)
+        n_estimators=400,      #재준님 제안 하이퍼파라미터로 조정
+        max_depth=30,          
+        min_samples_split=2,   
+        min_samples_leaf=1,    
+        max_features='sqrt',   
         bootstrap=True,
         oob_score=True,
         random_state=42,
