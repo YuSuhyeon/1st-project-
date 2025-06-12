@@ -1,0 +1,41 @@
+{
+  "Random Forest": {
+    "MAE": 16162.65150461914,
+    "RMSE": 29151.572737349714,
+    "R²": 0.9085781205371969,
+    "MAPE": 11.120371939724931,
+    "Train Time": 23.122574
+  },
+  "XGBoost": {
+    "MAE": 17781.690399258543,
+    "RMSE": 30511.21271349916,
+    "R²": 0.8998513488159225,
+    "MAPE": 12.743100877824839,
+    "Train Time": 1.82186
+  },
+  "Linear Regression": {
+    "MAE": 38961.44785991277,
+    "RMSE": 62693.97214103326,
+    "R²": 0.577158369954887,
+    "MAPE": 32.41190608111005,
+    "Train Time": 0.08072
+  },
+  "metadata": {
+    "training_period": "2022-2024",
+    "prediction_period": "2025",
+    "features_used": [
+      "CGG_LABEL_ENCODED",
+      "PYEONG",
+      "BUILDING_AGE",
+      "FLR",
+      "BRAND_SCORE",
+      "IS_PREMIUM_GU",
+      "SUBWAY_SCORE",
+      "EDUCATION_PREMIUM"
+    ],
+    "best_model_overall": "Random Forest",
+    "training_size": 103697,
+    "prediction_size": 29959,
+    "timestamp": "2025-06-11T17:45:25.962520"
+  }
+}
