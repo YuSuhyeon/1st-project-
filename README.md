@@ -29,7 +29,7 @@ python model_training_2025_prediction.py
 streamlit run streamlit_dashboard_2025.py
 ```
 
-### 5. 2025 데이터로 모델의 예측정확도 검증 및 리포트 생성성
+### 5. 2025 데이터로 모델의 예측정확도 검증 및 리포트 생성
 ```bash
 python all_models_validation_2025.py
 ```
