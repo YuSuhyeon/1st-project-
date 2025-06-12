@@ -40,6 +40,7 @@ def preprocessing_for_2025_prediction():
     # 기본 피처 생성
     df['PRICE'] = df['PRICE_EUK'] * 10000
     df['CTRT_YEAR'] = pd.to_datetime(df['CTRT_DAY']).dt.year
+    df['ARCH_YR'] = df['ARCH_YR'].fillna(0).astype(int) # 빈값을 0으로 바꾸고 float 에서 int로 변환
     df['BUILDING_AGE'] = 2025 - df['ARCH_YR']  #모든 예측이 2025년 기준이므로 건물나이도 2025년 기준으로 계산
     
     print(f"   피처 생성 완료: PRICE, CTRT_YEAR, BUILDING_AGE")
@@ -58,6 +59,7 @@ def preprocessing_for_2025_prediction():
     df = df[(df['BUILDING_AGE'] >= 0) & (df['BUILDING_AGE'] <= 50)]
     
     # 기타 기본 필터링
+    
     df = df[(df['PYEONG'] > 0) & (df['PRICE'] > 0)]
     df = df.dropna(subset=['ARCH_YR', 'PYEONG', 'FLR'])
     
@@ -71,7 +73,33 @@ def preprocessing_for_2025_prediction():
     print(f"   🔮 예측 데이터: {len(predict_data):,}건 (2025)")
     print(f"   📊 학습/예측 비율: {len(train_data)/(len(train_data)+len(predict_data))*100:.1f}% / {len(predict_data)/(len(train_data)+len(predict_data))*100:.1f}%")
     
+    # 4. 극단값 제거 (학습 데이터 기준으로만 - 데이터 리키지 방지)
+    print("\n4️⃣ 🔧 극단값 제거 (학습 데이터 기준)")
     
+    # 학습 데이터로만 분위수 계산
+    price_q01, price_q99 = train_data['PRICE'].quantile([0.01, 0.99])
+    pyeong_q01, pyeong_q99 = train_data['PYEONG'].quantile([0.01, 0.99])
+    
+    print(f"   가격 기준: {price_q01:,.0f} ~ {price_q99:,.0f}만원")
+    print(f"   평수 기준: {pyeong_q01:.1f} ~ {pyeong_q99:.1f}평")
+    
+    # 학습 데이터 극단값 제거
+    train_before = len(train_data)
+    train_data = train_data[
+        (train_data['PRICE'] >= price_q01) & (train_data['PRICE'] <= price_q99) &
+        (train_data['PYEONG'] >= pyeong_q01) & (train_data['PYEONG'] <= pyeong_q99)
+    ]
+    
+    # 예측 데이터에도 동일한 기준 적용
+    predict_before = len(predict_data)
+    predict_data = predict_data[
+        (predict_data['PRICE'] >= price_q01) & (predict_data['PRICE'] <= price_q99) &
+        (predict_data['PYEONG'] >= pyeong_q01) & (predict_data['PYEONG'] <= pyeong_q99)
+    ]
+    
+    print(f"   학습 데이터 극단값 제거: {train_before:,} → {len(train_data):,}건")
+    print(f"   예측 데이터 극단값 제거: {predict_before:,} → {len(predict_data):,}건")
+    print(f"   ✅ 완전한 데이터 누출 방지: 학습 데이터 기준으로만 극단값 제거")
     
     # 4. 브랜드 분석 (학습 데이터만!)
     print("\n5️⃣ 브랜드 분석 (학습 데이터 기준)")
@@ -104,7 +132,7 @@ def preprocessing_for_2025_prediction():
     
     def extract_advanced_brand(building_name):
         if pd.isna(building_name):
-            return '브랜드없음'  # 명칭 개선
+            return '기타브랜드'  # 명칭 개선
         
         building_name = str(building_name)
         
@@ -113,7 +141,7 @@ def preprocessing_for_2025_prediction():
             if re.search(pattern, building_name, re.IGNORECASE):
                 return brand
         
-        return '브랜드없음'  # 명칭 개선
+        return '기타브랜드'  # 명칭 개선
     
     # 브랜드 추출
     train_data.loc[:, 'BRAND_NAME'] = train_data['BLDG_NM'].apply(extract_advanced_brand)
@@ -426,22 +454,19 @@ def preprocessing_for_2025_prediction():
     
     # 매핑 정보 저장 (학습 데이터 기준)
     mapping_info = {
-    'feature_names': final_features,
-    'brand_score_mapping': {brand: get_brand_score(brand) for brand in brand_mapping.keys()},
-    'subway_score_mapping': subway_score_mapping,
-    'education_premium_mapping': education_premium_mapping,
-    'gu_label_mapping': gu_label_mapping,
-    'label_encoder_classes': label_encoder.classes_.tolist(),
-    'train_period': '2022-2024',
-    'predict_period': '2025',
-    'data_range': {
-        'price_min': train_data['PRICE'].min(),
-        'price_max': train_data['PRICE'].max(),
-        'price_mean': train_data['PRICE'].mean(),
-        'pyeong_min': train_data['PYEONG'].min(),
-        'pyeong_max': train_data['PYEONG'].max(),
-        'pyeong_mean': train_data['PYEONG'].mean(),
-        'outlier_removal': False  # 극단값 제거 안함
+        'feature_names': final_features,
+        'brand_score_mapping': {brand: get_brand_score(brand) for brand in brand_mapping.keys()},
+        'subway_score_mapping': subway_score_mapping,
+        'education_premium_mapping': education_premium_mapping,
+        'gu_label_mapping': gu_label_mapping,
+        'label_encoder_classes': label_encoder.classes_.tolist(),
+        'train_period': '2022-2024',
+        'predict_period': '2025',
+        'outlier_removal': {
+            'price_q01': price_q01,
+            'price_q99': price_q99, 
+            'pyeong_q01': pyeong_q01,
+            'pyeong_q99': pyeong_q99
         }
     }
     
@@ -476,6 +501,7 @@ def preprocessing_for_2025_prediction():
     print("\n" + "=" * 60)
     print("🎉 2025 서울 아파트 가격 예측 전처리 완료!")
     print(f"🔥 핵심 포인트:")
+    print(f"   📚 데이터 누출 완전 방지: 학습 데이터만으로 극단값 기준 계산")
     print(f"   🎯 브랜드 개선: 브랜드없음 1점 (실제 프리미엄 반영)")
     print(f"   🔮 예측 타겟: 2025 데이터 (순수 예측)")
     print(f"   📁 파일 관리: 덮어쓰기 방식으로 효율성 극대화")

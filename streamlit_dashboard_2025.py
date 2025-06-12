@@ -10,6 +10,7 @@ import joblib
 import pickle
 from pathlib import Path
 from datetime import datetime
+import time
 
 # 페이지 설정
 st.set_page_config(
@@ -54,7 +55,7 @@ class ApartmentPricePredictor2025:
                     self.model = joblib.load(rf_path)
                     self.model_name = "Random Forest"
                     self.model_loaded = True
-                    st.success(f"✅ {self.model_name} 모델 로드 성공! (R² 0.900, MAE 15,310만원)")
+                    st.success(f"✅ {self.model_name} 모델 로드 성공! (R² 0.918, MAE 13,561만원)")
                     return True
                 except Exception as e:
                     st.error(f"Random Forest 로드 실패: {e}")
@@ -101,7 +102,7 @@ class ApartmentPricePredictor2025:
     def get_brand_score(self, brand_name):
         """브랜드별 점수 반환 (전처리 코드와 일치)"""
         brand_scores = {
-            '브랜드없음': 1, '래미안': 5, '자이': 5, 'e편한세상': 4, '힐스테이트': 4,
+            '기타 브랜드': 1, '래미안': 5, '자이': 5, 'e편한세상': 4, '힐스테이트': 4,
             '아크로': 4, '더샵': 4, '푸르지오': 4, '롯데캐슬': 4,
             '수자인': 3, '위브': 3, '아이파크': 3, '센트럴': 3,
             '현대': 3, '삼성': 3, '한양': 3, '두산': 3
@@ -218,7 +219,7 @@ def main():
     
     # 헤더
     st.title("🏠 2025 서울 아파트 가격 예측기")
-    st.markdown("**Random Forest 모델 (R² 0.900, MAE 15,310만원) - 최고 성능**")
+    st.markdown("**Random Forest 모델 (R² 0.918, MAE 13,561만원) - 최고 성능**")
     st.markdown("---")
     
     # 모델 초기화
@@ -234,13 +235,12 @@ def main():
     st.sidebar.header("🔧 예측 조건 설정")
     
     # 1. 위치 정보
-    st.sidebar.subheader("📍 위치 정보")
+    st.sidebar.subheader("📍 자치구 정보")
     district = st.sidebar.selectbox(
         "자치구 선택",
-        options=['강남구', '서초구', '송파구', '강동구', '마포구', '용산구', '성동구', 
-                '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구', '노원구',
-                '은평구', '서대문구', '종로구', '중구', '영등포구', '동작구', '관악구',
-                '양천구', '강서구', '구로구', '금천구'],
+        options=['강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+                '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+                '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'],
         index=0  # 강남구 기본값
     )
     
@@ -281,15 +281,15 @@ def main():
         step=0.5
     )
     
-    # 전용면적 자동 계산
+    # 건축면적 자동 계산
     area = pyeong / 0.3025
-    st.sidebar.write(f"전용면적: **{area:.1f}㎡**")
+    st.sidebar.write(f"건축면적: **{area:.1f}㎡**")
     
     # 층수
     floor = st.sidebar.slider(
         "층수",
         min_value=1,
-        max_value=50,
+        max_value=70,
         value=10
     )
     
@@ -310,7 +310,7 @@ def main():
     
     brand_name = st.sidebar.selectbox(
         "브랜드 선택",
-        options=['브랜드없음', '래미안', '자이', 'e편한세상', '힐스테이트', '아크로', '더샵',
+        options=['기타 브랜드', '래미안', '자이', 'e편한세상', '힐스테이트', '아크로', '더샵',
                 '푸르지오', '롯데캐슬', '수자인', '위브', '아이파크', '센트럴',
                 '현대', '삼성', '한양', '두산'],
         index=0  # 브랜드없음 기본값
@@ -324,11 +324,11 @@ def main():
     elif brand_score == 4:
         st.sidebar.info("⭐⭐⭐⭐ 고급 브랜드")
     elif brand_score == 3:
-        st.sidebar.warning("⭐⭐⭐ 중급급 브랜드")
+        st.sidebar.warning("⭐⭐⭐ 중급 브랜드")
     elif brand_score == 2:
         st.sidebar.warning("⭐⭐ 일반 브랜드")    
     else:
-        st.sidebar.error("⭐ 브랜드없음")
+        st.sidebar.error("⭐ 기타 브랜드")
     
     # 예측 버튼
     st.sidebar.markdown("---")
@@ -437,9 +437,9 @@ def main():
         st.markdown("### 📊 모델 성능")
         if predictor.model_loaded:
             st.write(f"- **모델**: {predictor.model_name}")
-            st.write("- **R² Score**: 0.900")
-            st.write("- **MAE**: 15,310만원") 
-            st.write("- **MAPE**: 11.5%")
+            st.write("- **R² Score**: 0.918")
+            st.write("- **MAE**: 13,561만원") 
+            st.write("- **MAPE**: 10.1%")
             st.write("- **학습 데이터**: 2022-2024")
         else:
             st.write("- **모델**: 간단한 추정 모델")
@@ -452,7 +452,7 @@ def main():
         st.write("2. **평수** (핵심 가격 결정 요인)")
         st.write("3. **건축년수** (2025년 기준)")
         st.write("4. **층수** (중층 선호)")
-        st.write("5. **브랜드 점수** (1-5점, 브랜드없음=1점)")
+        st.write("5. **브랜드 점수** (1-5점, 기타 브랜드=1점)")
         st.write("6. **강남3구** (프리미엄 지역)")
         st.write("7. **지하철 접근성** (2-5점)")
         st.write("8. **교육특구** (학군 프리미엄)")
@@ -462,11 +462,10 @@ def main():
     st.markdown("---")
     st.info("""
     💡 **안내사항**
-    - 이 예측은 2022-2024년의 실제 서울 아파트 3개년 거래 데이터(103,251건)를 기반으로 한 8피처 머신러닝 모델입니다.
-    - Label Encoding을 사용하여 과적합을 방지하고 일반화 성능을 향상시켰습니다.
+    - 이 예측서비스는 실제 서울 아파트 3년(2022~2024) 거래 데이터(103,251건)를 학습된 머신러닝 모델입니다.
     - 브랜드, 지하철 접근성, 교육특구 등 실제 부동산 가격에 영향을 미치는 요인들을 반영했습니다.
-    - 실제 거래가격은 개별 아파트의 특성(향, 뷰, 단지 규모 등)에 따라 달라질 수 있습니다. (+고가 아파트 일수록 실거래와 차이가 많이 날 수 있습니다.)
-    - 투자 결정시에는 반드시 전문가와 상담하시기 바랍니다.
+    - 실제 거래가격은 아파트의 개별 아파트의 특성에 따라 달라질 수 있습니다. (고가 아파트 일수록 실거래가와 차이가 많이 날 수 있습니다.)
+    - 투자 결정은 반드시 전문가와 상담하시기 바랍니다.
     """)
 
 if __name__ == "__main__":

@@ -19,6 +19,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, mean_absolute_percentage_error
 
+from sklearn.model_selection import GridSearchCV
+
 import xgboost as xgb
 import joblib
 
@@ -118,21 +120,43 @@ def train_2025_prediction_models():
     # 4-1. Random Forest (🔧 적당한 성능으로 조정)
     print(f"\n   🌲 Random Forest 학습...")
     start_time = datetime.now()
-    
+
     rf_model = RandomForestRegressor(
-        n_estimators=400,      #재준님 제안 하이퍼파라미터로 조정
-        max_depth=30,          
-        min_samples_split=2,   
-        min_samples_leaf=1,    
-        max_features='sqrt',   
+        # n_estimators=400,      # 🔧 500 → 350 (적당히 줄임)
+        # max_depth=25,          # 🔧 25 → 22 (살짝 줄임)
+        # min_samples_split=3,   # 🔧 3 → 4 (살짝 보수적)
+        # min_samples_leaf=1,    # 🔧 1 → 2 (살짝 보수적)
+        # max_features=0.8,   # 🔧 log2 → sqrt (살짝 보수적)
         bootstrap=True,
         oob_score=True,
         random_state=42,
+        warm_start=False,
         n_jobs=-1
     )
+        
     
-    rf_model.fit(X_train, y_train)
-    rf_pred = rf_model.predict(X_predict)
+    # 탐색할 하이퍼파라미터 그리드 정의
+    param_grid = {
+        'n_estimators': [400],
+        'max_depth': [25],
+        'min_samples_split': [3],
+        'min_samples_leaf': [1],
+        'max_features': [0.8, 1.0]
+    }
+
+    grid_search = GridSearchCV(
+        estimator=rf_model,
+        param_grid=param_grid,
+        cv=5,  # 5겹 교차검증
+        scoring=['neg_mean_squared_error', 'r2', 'neg_mean_absolute_error'],  # 회귀에서는 MSE(작을수록 좋음)
+        refit= 'r2',
+        n_jobs=-1,  # 모든 CPU 사용
+        verbose=2
+        )
+
+    
+    best_rf = grid_search.fit(X_train, y_train)
+    rf_pred = best_rf.predict(X_predict)
     
     # 성능 계산
     rf_mae = mean_absolute_error(y_predict, rf_pred)
@@ -150,17 +174,19 @@ def train_2025_prediction_models():
         'Train Time': train_time
     }
     predictions['Random Forest'] = rf_pred
-    models_dict['Random Forest'] = rf_model
+    models_dict['Random Forest'] = best_rf
     
     # Random Forest 저장
     rf_path = models_dir / "random_forest_model.pkl"
-    joblib.dump(rf_model, rf_path)
-    
+    joblib.dump(best_rf, rf_path, protocol=4)
+
+    print(f"      최적 모델 객체 : {best_rf.best_estimator_}")
     print(f"   ✅ Random Forest 완료! 저장: {rf_path.name}")
     print(f"      MAE: {rf_mae:,.0f}만원, RMSE: {rf_rmse:,.0f}만원")
     print(f"      R²: {rf_r2:.3f}, MAPE: {rf_mape:.1f}%")
     print(f"      학습 시간: {train_time:.1f}초")
     
+
     # 4-2. XGBoost (🔧 살짝 성능 향상)
     print(f"\n   🚀 XGBoost 학습...")
     start_time = datetime.now()
@@ -263,6 +289,7 @@ def train_2025_prediction_models():
     best_model_by_mae = results_df['MAE'].idxmin()
     best_model_by_r2 = results_df['R²'].idxmax()
     best_model_by_mape = results_df['MAPE'].idxmin()
+
     
     print(f"\n   🏆 최고 성능:")
     print(f"   - MAE 기준: {best_model_by_mae} ({results_df.loc[best_model_by_mae, 'MAE']:,.0f}만원)")
@@ -287,7 +314,7 @@ def train_2025_prediction_models():
     feature_importance = {}
     
     # Random Forest 피처 중요도
-    rf_importance = dict(zip(X_train.columns, rf_model.feature_importances_))
+    rf_importance = dict(zip(X_train.columns, best_rf.best_estimator_.feature_importances_))
     feature_importance['Random Forest'] = rf_importance
     
     # XGBoost 피처 중요도
