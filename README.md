@@ -110,7 +110,7 @@ python all_models_validation_2025.py
 - 성능 평가 및 비교
 - Streamlit UI 구축 및 시연
 
-
+---
 
 ## 📊 결과 및 인사이트
 ✅ **성공 요소**
@@ -121,5 +121,13 @@ python all_models_validation_2025.py
 ⚠️ **한계점**
 - 고가 아파트: 20억+ 예측 정확도 낮음 (16.2% MAPE)
 - 데이터 근거: 임의 점수 부여로 객관성 한계
+
+---
+
+## 추가 작업: 🔗 시연 사이트
+Azure VM으로 Streamlit 기반 예측 서비스가 배포되어 있습니다.  
+*아래 주소는 **Azure VM 실행 중에만 접속 가능**합니다
+
+👉 [http://seoulapt.duckdns.org:8501](http://seoulapt.duckdns.org:8501)
 
 
